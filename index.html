@@ -44,7 +44,7 @@ td { background:#111228; border-radius:8px; margin-bottom:4px; }
 </style>
 </head>
 <body>
-<header>Controle de Gastos Sistem CN</header>
+<header>Controle de Gastos Tech</header>
 <div class="container">
 
 <!-- LOGIN -->
@@ -55,6 +55,7 @@ td { background:#111228; border-radius:8px; margin-bottom:4px; }
   <label>Senha:</label>
   <input type="password" id="senha">
   <button onclick="login()">Entrar / Registrar</button>
+  <p style="margin-top:10px; font-size:12px; color:#0ff; text-align:center;">Desenvolvimento por Nay Cordeiro</p>
 </div>
 
 <!-- APP -->
@@ -112,6 +113,7 @@ td { background:#111228; border-radius:8px; margin-bottom:4px; }
 
   <button style="background:#00ffaa;" onclick="gerarPDF()">Gerar PDF</button>
   <button style="background:#ff0033;color:white;margin-top:10px;" onclick="logout()">Sair</button>
+  <p style="margin-top:15px; font-size:12px; color:#0ff; text-align:center;">Desenvolvimento por Nay Cordeiro</p>
 </div>
 
 <!-- FIREBASE -->
@@ -287,38 +289,43 @@ async function gerarPDF(){
     if(!currentUser) return;
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(18); doc.text("Relatório Financeiro",14,20); doc.setFontSize(12);
+    doc.setFontSize(18); 
+    doc.text("Relatório Financeiro",14,20); 
+    doc.setFontSize(12);
     let y=30;
 
     const snapshot = await db.collection("contas").where("userId","==",currentUser.uid).get();
     const snapshotR = await db.collection("rendas").where("userId","==",currentUser.uid).get();
 
+    // DESPESAS
     doc.setFontSize(14); doc.text("Despesas",14,y); y+=8; doc.setFontSize(12);
     snapshot.docs.forEach(c=>{
         const conta = c.data();
         const status = conta.pago ? "[Pago]" : "[Não Pago]";
         doc.text(`${conta.descricao} - R$ ${conta.valor.toFixed(2)} - ${conta.data.split("-").reverse().join("/")} ${status}`,14,y); y+=7;
-        if(y>280){ doc.addPage(); y=20; }
+        if(y>270){ doc.addPage(); y=20; }
     });
 
+    // RENDAS
     doc.setFontSize(14); doc.text("Rendas",14,y); y+=8; doc.setFontSize(12);
     snapshotR.docs.forEach(r=>{
         const renda = r.data();
         doc.text(`${renda.descricao} - R$ ${renda.valor.toFixed(2)} - ${renda.data.split("-").reverse().join("/")}`,14,y); y+=7;
-        if(y>280){ doc.addPage(); y=20; }
+        if(y>270){ doc.addPage(); y=20; }
     });
 
-    let totalDespesas=0, totalPago=0, totalRenda=0;
+    // RESUMO
+    let totalDespesas=0,totalPago=0,totalRenda=0;
     snapshot.docs.forEach(c=>{ totalDespesas+=c.data().valor; if(c.data().pago) totalPago+=c.data().valor; });
     snapshotR.docs.forEach(r=>{ totalRenda+=r.data().valor; });
-    const saldo = totalRenda - (totalDespesas - totalPago);
-
-    y+=10; doc.setFontSize(14); doc.text("Resumo",14,y); y+=8; doc.setFontSize(12);
+    const saldo = totalRenda-(totalDespesas-totalPago);
+    y+=10;
     doc.text(`Total Renda: R$ ${totalRenda.toFixed(2)}`,14,y); y+=7;
     doc.text(`Total Despesas: R$ ${totalDespesas.toFixed(2)}`,14,y); y+=7;
     doc.text(`Pago: R$ ${totalPago.toFixed(2)}`,14,y); y+=7;
-    doc.text(`Saldo Restante: R$ ${saldo.toFixed(2)}`,14,y); y+=7;
-
+    doc.text(`Saldo Restante: R$ ${saldo.toFixed(2)}`,14,y); y+=15;
+    doc.setFontSize(10);
+    doc.text("Desenvolvimento por Nay Cordeiro",14,290);
     doc.save("relatorio_financeiro.pdf");
 }
 </script>
