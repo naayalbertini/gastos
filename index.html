@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Gastos Tech</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body { font-family: 'Orbitron', sans-serif; margin:0; background:#0f111a; color:#e0e0e0; }
+header { background: linear-gradient(90deg, #0ff, #4f46e5); color:#0f111a; padding:25px; text-align:center; font-size:28px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; box-shadow:0 6px 20px rgba(0,255,255,0.3);}
+.container { max-width:950px; margin:20px auto; background:#1a1c2b; padding:20px; border-radius:20px; box-shadow:0 10px 30px rgba(0,255,255,0.1);}
+h2 { color:#0ff; font-weight:600; border-left:4px solid #0ff; padding-left:10px; margin-top:0; }
+label { font-weight:500; display:block; margin-top:12px; margin-bottom:6px; }
+input, button { width:100%; padding:12px; border-radius:12px; border:1px solid #444; font-size:16px; box-sizing:border-box; background:#111228; color:#e0e0e0; transition:0.3s; }
+input:focus { outline:none; border-color:#0ff; box-shadow:0 0 10px #0ff; }
+button { background: linear-gradient(90deg, #0ff, #4f46e5); color:#0f111a; font-weight:700; cursor:pointer; margin-top:15px; transition:0.3s; border:none;}
+button:hover { background: linear-gradient(90deg, #4f46e5, #0ff); transform: translateY(-2px) scale(1.02); box-shadow:0 0 15px #0ff; }
+.resumo { display:flex; gap:15px; margin-top:20px; flex-wrap:wrap; }
+.resumo-box { background:#111228; flex:1 1 30%; text-align:center; padding:15px; border-radius:15px; box-shadow:0 0 15px rgba(0,255,255,0.2); font-weight:600; color:#0ff; }
+table { width:100%; border-collapse: collapse; margin-top:25px; font-size:15px;}
+th, td { padding:12px; text-align:center; border-bottom:1px solid #222; }
+th { background:#0ff; color:#0f111a; border-radius:8px 8px 0 0; }
+td { background:#111228; border-radius:8px; margin-bottom:4px; }
+.btn { padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:600; border:none; margin:2px; transition:0.3s; }
+.editar { background:#ffaa00; color:#111228;} .editar:hover { background:#ffbb33; }
+.excluir { background:#ff0033; color:white; } .excluir:hover { background:#ff3366; }
+.pago { background:#00aa00; color:white;} .pago:hover { background:#00ff00; }
+
+/* RESPONSIVO */
+@media(max-width:768px){
+    .resumo { flex-direction: column; }
+    .resumo-box { width:100%; }
+    table, thead, tbody, th, td, tr { display:block; }
+    thead tr { display:none; }
+    td { position:relative; padding-left:50%; margin-bottom:12px; text-align:left; }
+    td::before { position:absolute; top:12px; left:15px; width:45%; white-space:nowrap; font-weight:bold; color:#0ff; }
+    td:nth-of-type(1)::before { content:"Descrição"; }
+    td:nth-of-type(2)::before { content:"Valor"; }
+    td:nth-of-type(3)::before { content:"Data"; }
+    td:nth-of-type(4)::before { content:"Ações"; }
+    .btn { font-size:13px; padding:5px 8px; }
+    input, button { font-size:14px; padding:10px; }
+}
+</style>
+</head>
+<body>
+<header>Controle de Gastos Tech</header>
+<div class="container">
+
+<!-- LOGIN -->
+<div id="loginContainer">
+  <h2>Login / Cadastro</h2>
+  <label>E-mail:</label>
+  <input type="email" id="email">
+  <label>Senha:</label>
+  <input type="password" id="senha">
+  <button onclick="login()">Entrar / Registrar</button>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none;">
+  <h2>Olá, <span id="nomeUsuario"></span></h2>
+
+  <!-- DESPESAS -->
+  <h2>Novo Lançamento</h2>
+  <label>Descrição:</label>
+  <input type="text" id="descricao">
+  <label>Valor total:</label>
+  <input type="number" id="valor" step="0.01">
+  <label>Parcelas:</label>
+  <input type="number" id="parcelas" min="1" value="1">
+  <label>Data da primeira parcela:</label>
+  <input type="date" id="data">
+  <button onclick="salvarConta()">Salvar Despesa</button>
+
+  <label>Pesquisar dívida:</label>
+  <input type="text" id="filtro" placeholder="Digite descrição..." oninput="atualizarTabela()">
+
+  <!-- RENDAS -->
+  <h2>Minha Renda</h2>
+  <label>Descrição:</label>
+  <input type="text" id="descricaoRenda">
+  <label>Valor:</label>
+  <input type="number" id="valorRenda" step="0.01">
+  <label>Data:</label>
+  <input type="date" id="dataRenda">
+  <button onclick="salvarRenda()">Salvar Renda</button>
+
+  <div class="resumo">
+      <div class="resumo-box">Total Renda: R$ <span id="totalRenda">0,00</span></div>
+      <div class="resumo-box">Total Despesas: R$ <span id="totalValor">0,00</span></div>
+      <div class="resumo-box">Pago: R$ <span id="totalPago">0,00</span></div>
+      <div class="resumo-box">Saldo Restante: R$ <span id="totalRestante">0,00</span></div>
+  </div>
+
+  <!-- TABELAS -->
+  <h3>Despesas</h3>
+  <table>
+      <thead>
+          <tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="tabelaContas"></tbody>
+  </table>
+
+  <h3>Rendas</h3>
+  <table>
+      <thead>
+          <tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Ações</th></tr>
+      </thead>
+      <tbody id="tabelaRenda"></tbody>
+  </table>
+
+  <button style="background:#00ffaa;" onclick="gerarPDF()">Gerar PDF</button>
+  <button style="background:#ff0033;color:white;margin-top:10px;" onclick="logout()">Sair</button>
+</div>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyClaCzlMv9lYkZglYHH_R6XlggA5Ifgaw8",
+  authDomain: "contas-8ecfa.firebaseapp.com",
+  projectId: "contas-8ecfa",
+  storageBucket: "contas-8ecfa.firebasestorage.app",
+  messagingSenderId: "477279202548",
+  appId: "1:477279202548:web:00b0241177b66520b2c2a1"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser=null;
+let editandoId=null;
+
+// LOGIN
+async function login(){
+    const email=document.getElementById("email").value.trim();
+    const senha=document.getElementById("senha").value.trim();
+    if(!email || !senha){ alert("Preencha e-mail e senha"); return; }
+    try{
+        const userCredential=await auth.signInWithEmailAndPassword(email,senha);
+        initApp(userCredential.user);
+    }catch(err){
+        if(err.code==='auth/user-not-found'){
+            const userCredential=await auth.createUserWithEmailAndPassword(email,senha);
+            initApp(userCredential.user);
+        }else{ alert(err.message); }
+    }
+}
+
+// INICIALIZA APP
+function initApp(user){
+    currentUser=user;
+    document.getElementById("loginContainer").style.display="none";
+    document.getElementById("app").style.display="block";
+    document.getElementById("nomeUsuario").innerText=user.email.split("@")[0];
+    atualizarTabela();
+}
+
+// LOGOUT
+async function logout(){ await auth.signOut(); location.reload(); }
+
+// SALVAR DESPESA
+async function salvarConta(){
+    if(!currentUser) return alert("Usuário não logado!");
+    const descricao=document.getElementById("descricao").value.trim();
+    const valor=parseFloat(document.getElementById("valor").value);
+    const parcelas=parseInt(document.getElementById("parcelas").value);
+    const dataInicial=new Date(document.getElementById("data").value);
+    if(!descricao || !valor || parcelas<1 || isNaN(dataInicial)) return alert("Preencha todos os campos corretamente!");
+    if(editandoId){
+        await db.collection("contas").doc(editandoId).update({descricao, valor, data: dataInicial.toISOString().split("T")[0]});
+        editandoId=null;
+        limparCampos();
+        atualizarTabela();
+        return;
+    }
+    for(let i=0;i<parcelas;i++){
+        const dataParcela=new Date(dataInicial);
+        dataParcela.setMonth(dataParcela.getMonth()+i);
+        await db.collection("contas").add({
+            descricao: parcelas>1?`${descricao} - Parcela ${i+1}/${parcelas}`:descricao,
+            valor: valor/parcelas,
+            data: dataParcela.toISOString().split("T")[0],
+            pago: false,
+            userId: currentUser.uid
+        });
+    }
+    limparCampos();
+    atualizarTabela();
+}
+
+function limparCampos(){
+    document.getElementById("descricao").value="";
+    document.getElementById("valor").value="";
+    document.getElementById("parcelas").value=1;
+    document.getElementById("data").value="";
+}
+
+// SALVAR RENDA
+async function salvarRenda(){
+    if(!currentUser) return alert("Usuário não logado!");
+    const descricao=document.getElementById("descricaoRenda").value.trim();
+    const valor=parseFloat(document.getElementById("valorRenda").value);
+    const data=document.getElementById("dataRenda").value;
+    if(!descricao || !valor || !data) return alert("Preencha todos os campos!");
+    try{
+        await db.collection("rendas").add({descricao, valor, data, userId: currentUser.uid});
+        document.getElementById("descricaoRenda").value="";
+        document.getElementById("valorRenda").value="";
+        document.getElementById("dataRenda").value="";
+        atualizarTabela();
+    }catch(err){ console.error("Erro ao salvar renda:", err.message); alert("Erro ao salvar renda: "+err.message);}
+}
+
+// ATUALIZAR TABELAS
+async function atualizarTabela(){
+    if(!currentUser) return;
+    const filtro=document.getElementById("filtro")?.value.toLowerCase() || "";
+
+    // DESPESAS
+    const snapshot=await db.collection("contas").where("userId","==",currentUser.uid).get();
+    let totalDespesas=0, totalPago=0;
+    const tabela=document.getElementById("tabelaContas");
+    tabela.innerHTML="";
+    snapshot.docs.forEach(docSnap=>{
+        const conta={...docSnap.data(), id: docSnap.id};
+        totalDespesas += conta.valor;
+        if(conta.pago) totalPago += conta.valor;
+        if(conta.descricao.toLowerCase().includes(filtro)){
+            const linha=document.createElement("tr");
+            linha.innerHTML=`<td>${conta.descricao}</td><td>R$ ${conta.valor.toFixed(2)}</td><td>${conta.data.split("-").reverse().join("/")}</td>
+            <td>
+                <button class="btn editar" onclick="editarConta('${conta.id}','${conta.descricao}',${conta.valor},'${conta.data}')">Editar</button>
+                <button class="btn excluir" onclick="excluirConta('${conta.id}')">Excluir</button>
+                <button class="btn pago" onclick="togglePago('${conta.id}',${conta.pago})">${conta.pago?'Pago':'Marcar Pago'}</button>
+            </td>`;
+            tabela.appendChild(linha);
+        }
+    });
+
+    // RENDAS
+    const snapshotR=await db.collection("rendas").where("userId","==",currentUser.uid).get();
+    let totalRenda=0;
+    const tabelaR=document.getElementById("tabelaRenda");
+    tabelaR.innerHTML="";
+    snapshotR.docs.forEach(docSnap=>{
+        const renda={...docSnap.data(), id: docSnap.id};
+        totalRenda += renda.valor;
+        const linha=document.createElement("tr");
+        linha.innerHTML=`<td>${renda.descricao}</td><td>R$ ${renda.valor.toFixed(2)}</td>
+            <td>${renda.data.split("-").reverse().join("/")}</td>
+            <td><button class="btn excluir" onclick="excluirRenda('${renda.id}')">Excluir</button></td>`;
+        tabelaR.appendChild(linha);
+    });
+
+    const restanteDespesas = totalDespesas - totalPago;
+    const saldo = totalRenda - restanteDespesas;
+
+    document.getElementById("totalRenda").innerText = totalRenda.toFixed(2);
+    document.getElementById("totalValor").innerText = totalDespesas.toFixed(2);
+    document.getElementById("totalPago").innerText = totalPago.toFixed(2);
+    document.getElementById("totalRestante").innerText = saldo.toFixed(2);
+}
+
+// EDITAR DESPESA
+function editarConta(id,desc,valor,data){
+    document.getElementById("descricao").value=desc.replace(/ - Parcela.*/,"");
+    document.getElementById("valor").value=valor;
+    document.getElementById("parcelas").value=1;
+    document.getElementById("data").value=data;
+    editandoId=id;
+}
+
+// EXCLUIR
+async function excluirConta(id){ await db.collection("contas").doc(id).delete(); atualizarTabela(); }
+async function excluirRenda(id){ await db.collection("rendas").doc(id).delete(); atualizarTabela(); }
+
+// MARCAR PAGO
+async function togglePago(id, pagoAtual){ await db.collection("contas").doc(id).update({pago:!pagoAtual}); atualizarTabela(); }
+
+// GERAR PDF
+async function gerarPDF(){
+    if(!currentUser) return;
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    doc.setFontSize(18); doc.text("Relatório Financeiro",14,20); doc.setFontSize(12);
+    let y=30;
+
+    const snapshot = await db.collection("contas").where("userId","==",currentUser.uid).get();
+    const snapshotR = await db.collection("rendas").where("userId","==",currentUser.uid).get();
+
+    doc.setFontSize(14); doc.text("Despesas",14,y); y+=8; doc.setFontSize(12);
+    snapshot.docs.forEach(c=>{
+        const conta = c.data();
+        const status = conta.pago ? "[Pago]" : "[Não Pago]";
+        doc.text(`${conta.descricao} - R$ ${conta.valor.toFixed(2)} - ${conta.data.split("-").reverse().join("/")} ${status}`,14,y); y+=7;
+        if(y>280){ doc.addPage(); y=20; }
+    });
+
+    doc.setFontSize(14); doc.text("Rendas",14,y); y+=8; doc.setFontSize(12);
+    snapshotR.docs.forEach(r=>{
+        const renda = r.data();
+        doc.text(`${renda.descricao} - R$ ${renda.valor.toFixed(2)} - ${renda.data.split("-").reverse().join("/")}`,14,y); y+=7;
+        if(y>280){ doc.addPage(); y=20; }
+    });
+
+    let totalDespesas=0, totalPago=0, totalRenda=0;
+    snapshot.docs.forEach(c=>{ totalDespesas+=c.data().valor; if(c.data().pago) totalPago+=c.data().valor; });
+    snapshotR.docs.forEach(r=>{ totalRenda+=r.data().valor; });
+    const saldo = totalRenda - (totalDespesas - totalPago);
+
+    y+=10; doc.setFontSize(14); doc.text("Resumo",14,y); y+=8; doc.setFontSize(12);
+    doc.text(`Total Renda: R$ ${totalRenda.toFixed(2)}`,14,y); y+=7;
+    doc.text(`Total Despesas: R$ ${totalDespesas.toFixed(2)}`,14,y); y+=7;
+    doc.text(`Pago: R$ ${totalPago.toFixed(2)}`,14,y); y+=7;
+    doc.text(`Saldo Restante: R$ ${saldo.toFixed(2)}`,14,y); y+=7;
+
+    doc.save("relatorio_financeiro.pdf");
+}
+</script>
+</body>
+</html>
