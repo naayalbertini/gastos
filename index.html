@@ -3,152 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Pro | Web & Mobile</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>FinancePro | Híbrido</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
-        
-        /* Ajuste para não ficar colado no menu mobile */
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        .mobile-nav { display: none; }
         @media (max-width: 768px) {
+            .mobile-nav { display: flex; }
+            .desktop-header { padding: 10px 20px; }
             body { padding-bottom: 80px; }
-            .desktop-only { display: none; }
+            .hide-mobile { display: none; }
         }
-        @media (min-width: 769px) {
-            .mobile-only { display: none; }
-        }
-
-        .tab-active { color: #2563eb; border-bottom: 3px solid #2563eb; }
-        .glass-card { background: white; border: 1px solid #e2e8f0; border-radius: 1rem; }
-        .input-style { width: 100%; padding: 0.75rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; outline: none; transition: 0.2s; }
-        .input-style:focus { border-color: #3b82f6; ring: 2px; ring-color: #bfdbfe; }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
 <body>
 
-<header class="bg-white border-b sticky top-0 z-30 px-6 py-4">
-    <div class="max-w-6xl mx-auto flex justify-between items-center">
-        <div class="flex items-center gap-6">
-            <h1 class="text-2xl font-bold text-blue-600">Finance<span class="text-slate-800">Pro</span></h1>
-            <div class="flex items-center bg-slate-100 rounded-lg px-3 py-1">
-                <span class="text-xs font-bold text-slate-500 mr-2 uppercase">Mês Ref:</span>
-                <select id="filtroMesAno" onchange="atualizarDados()" class="bg-transparent font-semibold text-slate-700 outline-none cursor-pointer">
+<div id="auth-screen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 p-4">
+    <div class="bg-white p-8 rounded-3xl w-full max-w-md shadow-2xl">
+        <h2 class="text-2xl font-bold text-center text-blue-600 mb-6">FinancePro</h2>
+        <div class="space-y-4">
+            <input type="email" id="email" placeholder="Seu e-mail" class="w-full p-4 bg-slate-100 rounded-xl outline-none">
+            <input type="password" id="senha" placeholder="Sua senha" class="w-full p-4 bg-slate-100 rounded-xl outline-none">
+            <button onclick="login()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg">Entrar / Criar Conta</button>
+        </div>
+    </div>
+</div>
+
+<div id="main-app" class="hidden">
+    <header class="bg-white border-b sticky top-0 z-40 px-4 py-3 desktop-header">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-xl font-bold text-blue-600">FP</span>
+                <select id="filtroMesAno" onchange="atualizarDados()" class="bg-slate-100 p-2 rounded-lg font-bold text-sm outline-none">
                     </select>
             </div>
+            <button onclick="logout()" class="text-red-500 font-bold text-xs uppercase">Sair</button>
         </div>
-        <div class="flex items-center gap-4">
-            <span id="userDisplay" class="text-sm font-medium text-slate-600 desktop-only"></span>
-            <button onclick="logout()" class="text-sm font-bold text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg transition">Sair</button>
-        </div>
-    </div>
-</header>
+    </header>
 
-<main class="max-w-6xl mx-auto p-4 md:p-8">
-    
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="glass-card p-5 border-l-4 border-green-500 shadow-sm">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Minha Renda</p>
-            <h2 class="text-2xl font-bold text-slate-800">R$ <span id="resumoRenda">0,00</span></h2>
-        </div>
-        <div class="glass-card p-5 border-l-4 border-red-500 shadow-sm">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Gastos</p>
-            <h2 class="text-2xl font-bold text-slate-800">R$ <span id="resumoGastos">0,00</span></h2>
-        </div>
-        <div class="glass-card p-5 border-l-4 border-blue-500 shadow-sm">
-            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Já Pago</p>
-            <h2 class="text-2xl font-bold text-slate-800">R$ <span id="resumoPago">0,00</span></h2>
-        </div>
-        <div class="glass-card p-5 bg-blue-600 shadow-lg shadow-blue-200">
-            <p class="text-xs font-bold text-blue-100 uppercase tracking-wider">Saldo Disponível</p>
-            <h2 class="text-2xl font-bold text-white">R$ <span id="resumoSaldo">0,00</span></h2>
-            <p class="text-[10px] text-blue-200 mt-1">Renda do mês - Valores pagos</p>
-        </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-1 space-y-6">
-            <section id="form-container" class="glass-card p-6 sticky top-24">
-                <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                    <span class="p-2 bg-blue-50 text-blue-600 rounded-lg text-sm">➕</span> 
-                    Novo Lançamento
-                </h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs font-bold text-slate-500 ml-1">Tipo</label>
-                        <select id="tipo" class="input-style bg-slate-50 border-none">
-                            <option value="despesa">💸 Despesa (Saída)</option>
-                            <option value="renda">💰 Renda (Entrada)</option>
-                        </select>
-                    </div>
-                    <input type="text" id="descricao" placeholder="Descrição (Ex: Aluguel)" class="input-style">
-                    <div class="flex gap-2">
-                        <input type="number" id="valor" placeholder="Valor" class="input-style flex-1">
-                        <input type="number" id="parcelas" value="1" min="1" class="input-style w-20 text-center" title="Parcelas">
-                    </div>
-                    <input type="date" id="data" class="input-style">
-                    <button onclick="salvarLancamento()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-100">
-                        Confirmar Lançamento
-                    </button>
-                </div>
-            </section>
-        </div>
-
-        <div class="lg:col-span-2">
-            <div class="glass-card overflow-hidden shadow-sm">
-                <div class="p-4 border-b bg-slate-50/50 flex justify-between items-center">
-                    <h3 class="font-bold text-slate-700">Movimentações do Mês</h3>
-                    <input type="text" id="busca" oninput="atualizarDados()" placeholder="Buscar..." class="text-xs p-2 border rounded-md outline-none focus:ring-1">
-                </div>
-                
-                <div class="desktop-only overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] font-bold">
-                            <tr>
-                                <th class="px-6 py-3 tracking-wider">Descrição</th>
-                                <th class="px-6 py-3 tracking-wider">Data</th>
-                                <th class="px-6 py-3 tracking-wider text-right">Valor</th>
-                                <th class="px-6 py-3 tracking-wider text-center">Status</th>
-                                <th class="px-6 py-3 tracking-wider text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaCorpo" class="divide-y divide-slate-100">
-                            </tbody>
-                    </table>
-                </div>
-
-                <div id="listaMobile" class="mobile-only p-4 space-y-3">
-                    </div>
+    <main class="max-w-6xl mx-auto p-4 md:p-8">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border-b-4 border-green-500">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Rendas</p>
+                <p class="text-lg font-bold">R$ <span id="resumoRenda">0,00</span></p>
             </div>
-            
-            <button onclick="gerarPDF()" class="mt-4 w-full md:w-auto bg-white border border-slate-200 text-slate-600 font-bold py-2 px-6 rounded-lg hover:bg-slate-50 flex items-center justify-center gap-2 transition">
-                <span>📄</span> Exportar Relatório Mensal (PDF)
-            </button>
+            <div class="bg-white p-4 rounded-2xl shadow-sm border-b-4 border-red-500">
+                <p class="text-[10px] font-bold text-slate-400 uppercase">Gastos</p>
+                <p class="text-lg font-bold">R$ <span id="resumoGastos">0,00</span></p>
+            </div>
+            <div class="bg-blue-600 p-4 rounded-2xl shadow-lg text-white col-span-2">
+                <p class="text-[10px] font-bold opacity-80 uppercase">Saldo Disponível (Renda - Pago)</p>
+                <p class="text-2xl font-bold">R$ <span id="resumoSaldo">0,00</span></p>
+            </div>
         </div>
-    </div>
-</main>
 
-<nav class="mobile-only fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-40 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
-    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center text-blue-600">
-        <span class="text-xl">📊</span>
-        <span class="text-[10px] font-bold uppercase">Painel</span>
-    </button>
-    <button onclick="document.getElementById('form-container').scrollIntoView({behavior: 'smooth'})" class="flex flex-col items-center text-slate-400">
-        <span class="text-xl">➕</span>
-        <span class="text-[10px] font-bold uppercase">Adicionar</span>
-    </button>
-    <button onclick="gerarPDF()" class="flex flex-col items-center text-slate-400">
-        <span class="text-xl">📋</span>
-        <span class="text-[10px] font-bold uppercase">Relatório</span>
-    </button>
-</nav>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div id="aba-add" class="tab-content lg:block lg:col-span-1">
+                <div class="bg-white p-6 rounded-3xl shadow-sm sticky top-24">
+                    <h3 class="font-bold mb-4">Novo Lançamento</h3>
+                    <div class="space-y-4">
+                        <select id="tipo" class="w-full p-3 bg-slate-50 rounded-xl outline-none border">
+                            <option value="despesa">Despesa</option>
+                            <option value="renda">Renda</option>
+                        </select>
+                        <input type="text" id="descricao" placeholder="O que é?" class="w-full p-3 bg-slate-50 rounded-xl outline-none border">
+                        <div class="flex gap-2">
+                            <input type="number" id="valor" placeholder="Valor" class="flex-1 p-3 bg-slate-50 rounded-xl outline-none border">
+                            <input type="number" id="parcelas" value="1" class="w-20 p-3 bg-slate-50 rounded-xl outline-none border">
+                        </div>
+                        <input type="date" id="data" class="w-full p-3 bg-slate-50 rounded-xl outline-none border">
+                        <button onclick="salvar()" class="w-full bg-slate-900 text-white font-bold py-4 rounded-xl">Salvar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="aba-list" class="tab-content active lg:block lg:col-span-2">
+                <div class="bg-white rounded-3xl shadow-sm overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
+                        <h3 class="font-bold text-sm">Movimentos do Mês</h3>
+                        <span id="contagem" class="text-[10px] bg-blue-100 text-blue-600 px-2 py-1 rounded-full font-bold">0 itens</span>
+                    </div>
+                    <div id="listaLancamentos" class="divide-y">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <nav class="mobile-nav fixed bottom-0 left-0 right-0 bg-white border-t p-3 justify-around z-50 shadow-2xl">
+        <button onclick="alternarAba('list')" class="flex flex-col items-center gap-1">
+            <span class="text-xl">📄</span>
+            <span class="text-[10px] font-bold">Extrato</span>
+        </button>
+        <button onclick="alternarAba('add')" class="flex flex-col items-center gap-1">
+            <span class="text-xl text-blue-600">➕</span>
+            <span class="text-[10px] font-bold">Novo</span>
+        </button>
+        <button onclick="gerarPDF()" class="flex flex-col items-center gap-1">
+            <span class="text-xl">📥</span>
+            <span class="text-[10px] font-bold">PDF</span>
+        </button>
+    </nav>
+</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
-// CONFIGURAÇÕES DO FIREBASE (SUBSTITUA PELAS SUAS SE NECESSÁRIO)
 const firebaseConfig = {
   apiKey: "AIzaSyClaCzlMv9lYkZglYHH_R6XlggA5Ifgaw8",
   authDomain: "contas-8ecfa.firebaseapp.com",
@@ -162,147 +128,114 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 let currentUser = null;
 
-// INICIALIZAÇÃO E CONTROLE DE MESES
-function configurarSeletorMeses() {
-    const select = document.getElementById("filtroMesAno");
-    const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
-    const hoje = new Date();
-    
-    // Gera 12 meses para trás e 12 para frente
-    for(let i = -12; i <= 12; i++) {
-        let d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
-        let valorMes = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        let label = `${meses[d.getMonth()]} / ${d.getFullYear()}`;
-        let opt = new Option(label, valorMes);
-        if(i === 0) opt.selected = true;
-        select.add(opt);
+// Lógica de Autenticação para Mobile
+async function login() {
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+    try {
+        await auth.signInWithEmailAndPassword(email, senha);
+    } catch(e) {
+        try {
+            await auth.createUserWithEmailAndPassword(email, senha);
+        } catch(err) { alert("Erro: " + err.message); }
     }
 }
 
 auth.onAuthStateChanged(user => {
-    if (user) {
+    if(user) {
         currentUser = user;
-        document.getElementById("userDisplay").innerText = user.email.split("@")[0];
-        configurarSeletorMeses();
-        atualizarDados();
+        document.getElementById("auth-screen").classList.add("hidden");
+        document.getElementById("main-app").classList.remove("hidden");
+        init();
     } else {
-        window.location.href = "login.html"; // Opcional: redirecionar para tela de login
+        document.getElementById("auth-screen").classList.remove("hidden");
+        document.getElementById("main-app").classList.add("hidden");
     }
 });
 
-// SALVAR LANÇAMENTO (DESPESA OU RENDA)
-async function salvarLancamento() {
-    const tipo = document.getElementById("tipo").value;
-    const desc = document.getElementById("descricao").value.trim();
-    const valor = parseFloat(document.getElementById("valor").value);
-    const parc = parseInt(document.getElementById("parcelas").value);
-    const dataStr = document.getElementById("data").value;
-
-    if(!desc || isNaN(valor) || !dataStr) return alert("Por favor, preencha todos os campos.");
-
-    const colecao = (tipo === 'despesa') ? "contas" : "rendas";
-    const dataInicial = new Date(dataStr + "T12:00:00");
-
-    for(let i=0; i<parc; i++) {
-        let dataParcela = new Date(dataInicial);
-        dataParcela.setMonth(dataParcela.getMonth() + i);
-        
-        await db.collection(colecao).add({
-            descricao: parc > 1 ? `${desc} (${i+1}/${parc})` : desc,
-            valor: (tipo === 'despesa') ? (valor / parc) : valor,
-            data: dataParcela.toISOString().split('T')[0],
-            pago: false,
-            userId: currentUser.uid,
-            createdAt: new Date()
-        });
+function init() {
+    const sel = document.getElementById("filtroMesAno");
+    if(sel.options.length > 0) return;
+    const meses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+    const hoje = new Date();
+    for(let i = -6; i <= 6; i++) {
+        let d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
+        let val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        let txt = `${meses[d.getMonth()]} / ${d.getFullYear()}`;
+        sel.add(new Option(txt, val, i===0, i===0));
     }
-
-    // Limpar campos
-    document.getElementById("descricao").value = "";
-    document.getElementById("valor").value = "";
-    document.getElementById("parcelas").value = "1";
-    alert("Lançamento realizado!");
     atualizarDados();
 }
 
-// ATUALIZAR INTERFACE
+async function salvar() {
+    const tipo = document.getElementById("tipo").value;
+    const desc = document.getElementById("descricao").value;
+    const valor = parseFloat(document.getElementById("valor").value);
+    const parc = parseInt(document.getElementById("parcelas").value);
+    const data = document.getElementById("data").value;
+
+    if(!desc || !valor || !data) return alert("Preencha tudo!");
+
+    const col = tipo === 'despesa' ? 'contas' : 'rendas';
+    const dataBase = new Date(data + "T12:00:00");
+
+    for(let i=0; i<parc; i++) {
+        let d = new Date(dataBase);
+        d.setMonth(d.getMonth() + i);
+        await db.collection(col).add({
+            descricao: parc > 1 ? `${desc} ${i+1}/${parc}` : desc,
+            valor: tipo === 'despesa' ? (valor/parc) : valor,
+            data: d.toISOString().split('T')[0],
+            pago: false,
+            userId: currentUser.uid
+        });
+    }
+    alert("Salvo!");
+    alternarAba('list');
+    atualizarDados();
+}
+
 async function atualizarDados() {
     if(!currentUser) return;
-    const mesReferencia = document.getElementById("filtroMesAno").value; // Formato: "YYYY-MM"
-    const termoBusca = document.getElementById("busca").value.toLowerCase();
+    const mesAno = document.getElementById("filtroMesAno").value;
+    const resRenda = await db.collection("rendas").where("userId","==",currentUser.uid).get();
+    const resContas = await db.collection("contas").where("userId","==",currentUser.uid).get();
 
-    const snapContas = await db.collection("contas").where("userId","==",currentUser.uid).get();
-    const snapRendas = await db.collection("rendas").where("userId","==",currentUser.uid).get();
+    let totalRenda = 0, totalGastos = 0, totalPago = 0;
+    const lista = document.getElementById("listaLancamentos");
+    lista.innerHTML = "";
 
-    let somaRenda = 0, somaGastos = 0, somaPago = 0;
-    
-    const tabela = document.getElementById("tabelaCorpo");
-    const listaMobile = document.getElementById("listaMobile");
-    tabela.innerHTML = "";
-    listaMobile.innerHTML = "";
-
-    // Processar Rendas do Mês
-    snapRendas.docs.forEach(doc => {
-        const r = doc.data();
-        if(r.data.startsWith(mesReferencia)) somaRenda += r.valor;
+    resRenda.docs.forEach(doc => {
+        if(doc.data().data.startsWith(mesAno)) totalRenda += doc.data().valor;
     });
 
-    // Processar Despesas do Mês
-    const despesas = snapContas.docs
+    const contas = resContas.docs
         .map(d => ({...d.data(), id: d.id}))
-        .filter(d => d.data.startsWith(mesReferencia))
-        .sort((a,b) => new Date(b.data) - new Date(a.data));
+        .filter(d => d.data.startsWith(mesAno));
 
-    despesas.forEach(d => {
-        if(!d.descricao.toLowerCase().includes(termoBusca)) return;
+    contas.forEach(c => {
+        totalGastos += c.valor;
+        if(c.pago) totalPago += c.valor;
 
-        somaGastos += d.valor;
-        if(d.pago) somaPago += d.valor;
-
-        // Inserir Tabela (Desktop)
-        const tr = document.createElement("tr");
-        tr.className = "hover:bg-slate-50 transition";
-        tr.innerHTML = `
-            <td class="px-6 py-4 font-semibold text-slate-700">${d.descricao}</td>
-            <td class="px-6 py-4 text-slate-500">${d.data.split('-').reverse().join('/')}</td>
-            <td class="px-6 py-4 text-right font-bold">R$ ${d.valor.toFixed(2)}</td>
-            <td class="px-6 py-4 text-center">
-                <button onclick="togglePago('${d.id}', ${d.pago})" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase transition ${d.pago ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
-                    ${d.pago ? 'Pago' : 'Pendente'}
-                </button>
-            </td>
-            <td class="px-6 py-4 text-center">
-                <button onclick="excluirLancamento('${d.id}')" class="text-red-400 hover:text-red-600 transition">Excluir</button>
-            </td>
-        `;
-        tabela.appendChild(tr);
-
-        // Inserir Lista (Mobile)
-        const card = document.createElement("div");
-        card.className = `p-4 rounded-xl border-l-4 shadow-sm bg-white ${d.pago ? 'border-green-500' : 'border-amber-500'}`;
-        card.innerHTML = `
-            <div class="flex justify-between items-start">
-                <div>
-                    <h4 class="font-bold text-slate-800 text-sm">${d.descricao}</h4>
-                    <p class="text-[10px] text-slate-400 uppercase">${d.data.split('-').reverse().join('/')}</p>
-                </div>
-                <p class="font-bold text-slate-700">R$ ${d.valor.toFixed(2)}</p>
+        const div = document.createElement("div");
+        div.className = "p-4 flex justify-between items-center hover:bg-slate-50";
+        div.innerHTML = `
+            <div onclick="togglePago('${c.id}', ${c.pago})" class="flex-1">
+                <p class="font-bold text-sm ${c.pago ? 'text-slate-400 line-through' : 'text-slate-700'}">${c.descricao}</p>
+                <p class="text-[10px] text-slate-400">${c.data.split('-').reverse().join('/')}</p>
             </div>
-            <div class="flex justify-between items-center mt-3">
-                <button onclick="togglePago('${d.id}', ${d.pago})" class="text-xs font-bold uppercase ${d.pago ? 'text-green-600' : 'text-amber-600'}">
-                    ${d.pago ? '✓ Confirmado' : '◯ Marcar Pago'}
-                </button>
-                <button onclick="excluirLancamento('${d.id}')" class="text-xs text-red-300">Remover</button>
+            <div class="text-right">
+                <p class="font-bold text-sm">R$ ${c.valor.toFixed(2)}</p>
+                <button onclick="excluir('${c.id}')" class="text-[10px] text-red-400">Remover</button>
             </div>
         `;
-        listaMobile.appendChild(card);
+        lista.appendChild(div);
     });
 
-    // Atualizar Dashboard
-    document.getElementById("resumoRenda").innerText = somaRenda.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-    document.getElementById("resumoGastos").innerText = somaGastos.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-    document.getElementById("resumoPago").innerText = somaPago.toLocaleString('pt-BR', {minimumFractionDigits: 2});
-    document.getElementById("resumoSaldo").innerText = (somaRenda - somaPago).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    document.getElementById("resumoRenda").innerText = totalRenda.toFixed(2);
+    document.getElementById("resumoGastos").innerText = totalGastos.toFixed(2);
+    document.getElementById("resumoSaldo").innerText = (totalRenda - totalPago).toFixed(2);
+    document.getElementById("contagem").innerText = `${contas.length} lançamentos`;
 }
 
 async function togglePago(id, status) {
@@ -310,30 +243,19 @@ async function togglePago(id, status) {
     atualizarDados();
 }
 
-async function excluirLancamento(id) {
-    if(confirm("Deseja apagar este registro?")) {
+async function excluir(id) {
+    if(confirm("Excluir?")) {
         await db.collection("contas").doc(id).delete();
         atualizarDados();
     }
 }
 
-function logout() { auth.signOut().then(() => location.reload()); }
-
-// PDF SIMPLIFICADO
-function gerarPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    const mes = document.getElementById("filtroMesAno").selectedOptions[0].text;
-    
-    doc.setFontSize(18);
-    doc.text(`Relatório Financeiro - ${mes}`, 14, 20);
-    doc.setFontSize(12);
-    doc.text(`Saldo Disponível: R$ ${document.getElementById("resumoSaldo").innerText}`, 14, 30);
-    doc.text("Desenvolvido por Nay Cordeiro", 14, 40);
-    
-    doc.save(`financeiro-${mes}.pdf`);
+function alternarAba(aba) {
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById(`aba-${aba}`).classList.add('active');
 }
-</script>
 
+function logout() { auth.signOut(); }
+</script>
 </body>
 </html>
