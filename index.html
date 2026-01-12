@@ -1,128 +1,154 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Controle de Gastos N.C</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&display=swap" rel="stylesheet">
-<style>
-body { font-family: 'Orbitron', sans-serif; margin:0; background:#0f111a; color:#e0e0e0; }
-header { background: linear-gradient(90deg, #0ff, #4f46e5); color:#0f111a; padding:25px; text-align:center; font-size:28px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; box-shadow:0 6px 20px rgba(0,255,255,0.3);}
-.container { max-width:950px; margin:20px auto; background:#1a1c2b; padding:20px; border-radius:20px; box-shadow:0 10px 30px rgba(0,255,255,0.1);}
-h2 { color:#0ff; font-weight:600; border-left:4px solid #0ff; padding-left:10px; margin-top:0; }
-label { font-weight:500; display:block; margin-top:12px; margin-bottom:6px; }
-input, button { width:100%; padding:12px; border-radius:12px; border:1px solid #444; font-size:16px; box-sizing:border-box; background:#111228; color:#e0e0e0; transition:0.3s; }
-input:focus { outline:none; border-color:#0ff; box-shadow:0 0 10px #0ff; }
-button { background: linear-gradient(90deg, #0ff, #4f46e5); color:#0f111a; font-weight:700; cursor:pointer; margin-top:15px; transition:0.3s; border:none;}
-button:hover { background: linear-gradient(90deg, #4f46e5, #0ff); transform: translateY(-2px) scale(1.02); box-shadow:0 0 15px #0ff; }
-.resumo { display:flex; gap:15px; margin-top:20px; flex-wrap:wrap; }
-.resumo-box { background:#111228; flex:1 1 30%; text-align:center; padding:15px; border-radius:15px; box-shadow:0 0 15px rgba(0,255,255,0.2); font-weight:600; color:#0ff; }
-table { width:100%; border-collapse: collapse; margin-top:25px; font-size:15px;}
-th, td { padding:12px; text-align:center; border-bottom:1px solid #222; }
-th { background:#0ff; color:#0f111a; border-radius:8px 8px 0 0; }
-td { background:#111228; border-radius:8px; margin-bottom:4px; }
-.btn { padding:6px 10px; border-radius:8px; cursor:pointer; font-weight:600; border:none; margin:2px; transition:0.3s; }
-.editar { background:#ffaa00; color:#111228;} .editar:hover { background:#ffbb33; }
-.excluir { background:#ff0033; color:white; } .excluir:hover { background:#ff3366; }
-.pago { background:#00aa00; color:white;} .pago:hover { background:#00ff00; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Pro | Web & Mobile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        
+        /* Ajuste para não ficar colado no menu mobile */
+        @media (max-width: 768px) {
+            body { padding-bottom: 80px; }
+            .desktop-only { display: none; }
+        }
+        @media (min-width: 769px) {
+            .mobile-only { display: none; }
+        }
 
-/* RESPONSIVO */
-@media(max-width:768px){
-    .resumo { flex-direction: column; }
-    .resumo-box { width:100%; }
-    table, thead, tbody, th, td, tr { display:block; }
-    thead tr { display:none; }
-    td { position:relative; padding-left:50%; margin-bottom:12px; text-align:left; }
-    td::before { position:absolute; top:12px; left:15px; width:45%; white-space:nowrap; font-weight:bold; color:#0ff; }
-    td:nth-of-type(1)::before { content:"Descrição"; }
-    td:nth-of-type(2)::before { content:"Valor"; }
-    td:nth-of-type(3)::before { content:"Data"; }
-    td:nth-of-type(4)::before { content:"Ações"; }
-    .btn { font-size:13px; padding:5px 8px; }
-    input, button { font-size:14px; padding:10px; }
-}
-</style>
+        .tab-active { color: #2563eb; border-bottom: 3px solid #2563eb; }
+        .glass-card { background: white; border: 1px solid #e2e8f0; border-radius: 1rem; }
+        .input-style { width: 100%; padding: 0.75rem; border-radius: 0.75rem; border: 1px solid #e2e8f0; outline: none; transition: 0.2s; }
+        .input-style:focus { border-color: #3b82f6; ring: 2px; ring-color: #bfdbfe; }
+    </style>
 </head>
 <body>
-<header>Controle de Gastos Tech</header>
-<div class="container">
 
-<!-- LOGIN -->
-<div id="loginContainer">
-  <h2>Login / Cadastro</h2>
-  <label>E-mail:</label>
-  <input type="email" id="email">
-  <label>Senha:</label>
-  <input type="password" id="senha">
-  <button onclick="login()">Entrar / Registrar</button>
-  <p style="margin-top:10px; font-size:12px; color:#0ff; text-align:center;">Desenvolvimento por Nay Cordeiro</p>
-</div>
+<header class="bg-white border-b sticky top-0 z-30 px-6 py-4">
+    <div class="max-w-6xl mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-6">
+            <h1 class="text-2xl font-bold text-blue-600">Finance<span class="text-slate-800">Pro</span></h1>
+            <div class="flex items-center bg-slate-100 rounded-lg px-3 py-1">
+                <span class="text-xs font-bold text-slate-500 mr-2 uppercase">Mês Ref:</span>
+                <select id="filtroMesAno" onchange="atualizarDados()" class="bg-transparent font-semibold text-slate-700 outline-none cursor-pointer">
+                    </select>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <span id="userDisplay" class="text-sm font-medium text-slate-600 desktop-only"></span>
+            <button onclick="logout()" class="text-sm font-bold text-red-500 hover:bg-red-50 px-4 py-2 rounded-lg transition">Sair</button>
+        </div>
+    </div>
+</header>
 
-<!-- APP -->
-<div id="app" style="display:none;">
-  <h2>Olá, <span id="nomeUsuario"></span></h2>
+<main class="max-w-6xl mx-auto p-4 md:p-8">
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="glass-card p-5 border-l-4 border-green-500 shadow-sm">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Minha Renda</p>
+            <h2 class="text-2xl font-bold text-slate-800">R$ <span id="resumoRenda">0,00</span></h2>
+        </div>
+        <div class="glass-card p-5 border-l-4 border-red-500 shadow-sm">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Gastos</p>
+            <h2 class="text-2xl font-bold text-slate-800">R$ <span id="resumoGastos">0,00</span></h2>
+        </div>
+        <div class="glass-card p-5 border-l-4 border-blue-500 shadow-sm">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Já Pago</p>
+            <h2 class="text-2xl font-bold text-slate-800">R$ <span id="resumoPago">0,00</span></h2>
+        </div>
+        <div class="glass-card p-5 bg-blue-600 shadow-lg shadow-blue-200">
+            <p class="text-xs font-bold text-blue-100 uppercase tracking-wider">Saldo Disponível</p>
+            <h2 class="text-2xl font-bold text-white">R$ <span id="resumoSaldo">0,00</span></h2>
+            <p class="text-[10px] text-blue-200 mt-1">Renda do mês - Valores pagos</p>
+        </div>
+    </div>
 
-  <!-- DESPESAS -->
-  <h2>Novo Lançamento</h2>
-  <label>Descrição:</label>
-  <input type="text" id="descricao">
-  <label>Valor total:</label>
-  <input type="number" id="valor" step="0.01">
-  <label>Parcelas:</label>
-  <input type="number" id="parcelas" min="1" value="1">
-  <label>Data da primeira parcela:</label>
-  <input type="date" id="data">
-  <button onclick="salvarConta()">Salvar Despesa</button>
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-1 space-y-6">
+            <section id="form-container" class="glass-card p-6 sticky top-24">
+                <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                    <span class="p-2 bg-blue-50 text-blue-600 rounded-lg text-sm">➕</span> 
+                    Novo Lançamento
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="text-xs font-bold text-slate-500 ml-1">Tipo</label>
+                        <select id="tipo" class="input-style bg-slate-50 border-none">
+                            <option value="despesa">💸 Despesa (Saída)</option>
+                            <option value="renda">💰 Renda (Entrada)</option>
+                        </select>
+                    </div>
+                    <input type="text" id="descricao" placeholder="Descrição (Ex: Aluguel)" class="input-style">
+                    <div class="flex gap-2">
+                        <input type="number" id="valor" placeholder="Valor" class="input-style flex-1">
+                        <input type="number" id="parcelas" value="1" min="1" class="input-style w-20 text-center" title="Parcelas">
+                    </div>
+                    <input type="date" id="data" class="input-style">
+                    <button onclick="salvarLancamento()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-100">
+                        Confirmar Lançamento
+                    </button>
+                </div>
+            </section>
+        </div>
 
-  <label>Pesquisar dívida:</label>
-  <input type="text" id="filtro" placeholder="Digite descrição..." oninput="atualizarTabela()">
+        <div class="lg:col-span-2">
+            <div class="glass-card overflow-hidden shadow-sm">
+                <div class="p-4 border-b bg-slate-50/50 flex justify-between items-center">
+                    <h3 class="font-bold text-slate-700">Movimentações do Mês</h3>
+                    <input type="text" id="busca" oninput="atualizarDados()" placeholder="Buscar..." class="text-xs p-2 border rounded-md outline-none focus:ring-1">
+                </div>
+                
+                <div class="desktop-only overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-400 uppercase text-[10px] font-bold">
+                            <tr>
+                                <th class="px-6 py-3 tracking-wider">Descrição</th>
+                                <th class="px-6 py-3 tracking-wider">Data</th>
+                                <th class="px-6 py-3 tracking-wider text-right">Valor</th>
+                                <th class="px-6 py-3 tracking-wider text-center">Status</th>
+                                <th class="px-6 py-3 tracking-wider text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaCorpo" class="divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
 
-  <!-- RENDAS -->
-  <h2>Minha Renda</h2>
-  <label>Descrição:</label>
-  <input type="text" id="descricaoRenda">
-  <label>Valor:</label>
-  <input type="number" id="valorRenda" step="0.01">
-  <label>Data:</label>
-  <input type="date" id="dataRenda">
-  <button onclick="salvarRenda()">Salvar Renda</button>
+                <div id="listaMobile" class="mobile-only p-4 space-y-3">
+                    </div>
+            </div>
+            
+            <button onclick="gerarPDF()" class="mt-4 w-full md:w-auto bg-white border border-slate-200 text-slate-600 font-bold py-2 px-6 rounded-lg hover:bg-slate-50 flex items-center justify-center gap-2 transition">
+                <span>📄</span> Exportar Relatório Mensal (PDF)
+            </button>
+        </div>
+    </div>
+</main>
 
-  <div class="resumo">
-      <div class="resumo-box">Total Renda: R$ <span id="totalRenda">0,00</span></div>
-      <div class="resumo-box">Total Despesas: R$ <span id="totalValor">0,00</span></div>
-      <div class="resumo-box">Pago: R$ <span id="totalPago">0,00</span></div>
-      <div class="resumo-box">Saldo Restante: R$ <span id="totalRestante">0,00</span></div>
-  </div>
+<nav class="mobile-only fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around p-3 z-40 shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="flex flex-col items-center text-blue-600">
+        <span class="text-xl">📊</span>
+        <span class="text-[10px] font-bold uppercase">Painel</span>
+    </button>
+    <button onclick="document.getElementById('form-container').scrollIntoView({behavior: 'smooth'})" class="flex flex-col items-center text-slate-400">
+        <span class="text-xl">➕</span>
+        <span class="text-[10px] font-bold uppercase">Adicionar</span>
+    </button>
+    <button onclick="gerarPDF()" class="flex flex-col items-center text-slate-400">
+        <span class="text-xl">📋</span>
+        <span class="text-[10px] font-bold uppercase">Relatório</span>
+    </button>
+</nav>
 
-  <!-- TABELAS -->
-  <h3>Despesas</h3>
-  <table>
-      <thead>
-          <tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Ações</th></tr>
-      </thead>
-      <tbody id="tabelaContas"></tbody>
-  </table>
-
-  <h3>Rendas</h3>
-  <table>
-      <thead>
-          <tr><th>Descrição</th><th>Valor</th><th>Data</th><th>Ações</th></tr>
-      </thead>
-      <tbody id="tabelaRenda"></tbody>
-  </table>
-
-  <button style="background:#00ffaa;" onclick="gerarPDF()">Gerar PDF</button>
-  <button style="background:#ff0033;color:white;margin-top:10px;" onclick="logout()">Sair</button>
-  <p style="margin-top:15px; font-size:12px; color:#0ff; text-align:center;">Desenvolvimento por Nay Cordeiro</p>
-</div>
-
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script>
+// CONFIGURAÇÕES DO FIREBASE (SUBSTITUA PELAS SUAS SE NECESSÁRIO)
 const firebaseConfig = {
   apiKey: "AIzaSyClaCzlMv9lYkZglYHH_R6XlggA5Ifgaw8",
   authDomain: "contas-8ecfa.firebaseapp.com",
@@ -132,202 +158,182 @@ const firebaseConfig = {
   appId: "1:477279202548:web:00b0241177b66520b2c2a1"
 };
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
 const db = firebase.firestore();
-let currentUser=null;
-let editandoId=null;
+const auth = firebase.auth();
+let currentUser = null;
 
-// LOGIN
-async function login(){
-    const email=document.getElementById("email").value.trim();
-    const senha=document.getElementById("senha").value.trim();
-    if(!email || !senha){ alert("Preencha e-mail e senha"); return; }
-    try{
-        const userCredential=await auth.signInWithEmailAndPassword(email,senha);
-        initApp(userCredential.user);
-    }catch(err){
-        if(err.code==='auth/user-not-found'){
-            const userCredential=await auth.createUserWithEmailAndPassword(email,senha);
-            initApp(userCredential.user);
-        }else{ alert(err.message); }
+// INICIALIZAÇÃO E CONTROLE DE MESES
+function configurarSeletorMeses() {
+    const select = document.getElementById("filtroMesAno");
+    const meses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+    const hoje = new Date();
+    
+    // Gera 12 meses para trás e 12 para frente
+    for(let i = -12; i <= 12; i++) {
+        let d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
+        let valorMes = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        let label = `${meses[d.getMonth()]} / ${d.getFullYear()}`;
+        let opt = new Option(label, valorMes);
+        if(i === 0) opt.selected = true;
+        select.add(opt);
     }
 }
 
-// INICIALIZA APP
-function initApp(user){
-    currentUser=user;
-    document.getElementById("loginContainer").style.display="none";
-    document.getElementById("app").style.display="block";
-    document.getElementById("nomeUsuario").innerText=user.email.split("@")[0];
-    atualizarTabela();
-}
-
-// LOGOUT
-async function logout(){ await auth.signOut(); location.reload(); }
-
-// SALVAR DESPESA
-async function salvarConta(){
-    if(!currentUser) return alert("Usuário não logado!");
-    const descricao=document.getElementById("descricao").value.trim();
-    const valor=parseFloat(document.getElementById("valor").value);
-    const parcelas=parseInt(document.getElementById("parcelas").value);
-    const dataInicial=new Date(document.getElementById("data").value);
-    if(!descricao || !valor || parcelas<1 || isNaN(dataInicial)) return alert("Preencha todos os campos corretamente!");
-    if(editandoId){
-        await db.collection("contas").doc(editandoId).update({descricao, valor, data: dataInicial.toISOString().split("T")[0]});
-        editandoId=null;
-        limparCampos();
-        atualizarTabela();
-        return;
+auth.onAuthStateChanged(user => {
+    if (user) {
+        currentUser = user;
+        document.getElementById("userDisplay").innerText = user.email.split("@")[0];
+        configurarSeletorMeses();
+        atualizarDados();
+    } else {
+        window.location.href = "login.html"; // Opcional: redirecionar para tela de login
     }
-    for(let i=0;i<parcelas;i++){
-        const dataParcela=new Date(dataInicial);
-        dataParcela.setMonth(dataParcela.getMonth()+i);
-        await db.collection("contas").add({
-            descricao: parcelas>1?`${descricao} - Parcela ${i+1}/${parcelas}`:descricao,
-            valor: valor/parcelas,
-            data: dataParcela.toISOString().split("T")[0],
+});
+
+// SALVAR LANÇAMENTO (DESPESA OU RENDA)
+async function salvarLancamento() {
+    const tipo = document.getElementById("tipo").value;
+    const desc = document.getElementById("descricao").value.trim();
+    const valor = parseFloat(document.getElementById("valor").value);
+    const parc = parseInt(document.getElementById("parcelas").value);
+    const dataStr = document.getElementById("data").value;
+
+    if(!desc || isNaN(valor) || !dataStr) return alert("Por favor, preencha todos os campos.");
+
+    const colecao = (tipo === 'despesa') ? "contas" : "rendas";
+    const dataInicial = new Date(dataStr + "T12:00:00");
+
+    for(let i=0; i<parc; i++) {
+        let dataParcela = new Date(dataInicial);
+        dataParcela.setMonth(dataParcela.getMonth() + i);
+        
+        await db.collection(colecao).add({
+            descricao: parc > 1 ? `${desc} (${i+1}/${parc})` : desc,
+            valor: (tipo === 'despesa') ? (valor / parc) : valor,
+            data: dataParcela.toISOString().split('T')[0],
             pago: false,
-            userId: currentUser.uid
+            userId: currentUser.uid,
+            createdAt: new Date()
         });
     }
-    limparCampos();
-    atualizarTabela();
+
+    // Limpar campos
+    document.getElementById("descricao").value = "";
+    document.getElementById("valor").value = "";
+    document.getElementById("parcelas").value = "1";
+    alert("Lançamento realizado!");
+    atualizarDados();
 }
 
-function limparCampos(){
-    document.getElementById("descricao").value="";
-    document.getElementById("valor").value="";
-    document.getElementById("parcelas").value=1;
-    document.getElementById("data").value="";
-}
-
-// SALVAR RENDA
-async function salvarRenda(){
-    if(!currentUser) return alert("Usuário não logado!");
-    const descricao=document.getElementById("descricaoRenda").value.trim();
-    const valor=parseFloat(document.getElementById("valorRenda").value);
-    const data=document.getElementById("dataRenda").value;
-    if(!descricao || !valor || !data) return alert("Preencha todos os campos!");
-    try{
-        await db.collection("rendas").add({descricao, valor, data, userId: currentUser.uid});
-        document.getElementById("descricaoRenda").value="";
-        document.getElementById("valorRenda").value="";
-        document.getElementById("dataRenda").value="";
-        atualizarTabela();
-    }catch(err){ console.error("Erro ao salvar renda:", err.message); alert("Erro ao salvar renda: "+err.message);}
-}
-
-// ATUALIZAR TABELAS
-async function atualizarTabela(){
+// ATUALIZAR INTERFACE
+async function atualizarDados() {
     if(!currentUser) return;
-    const filtro=document.getElementById("filtro")?.value.toLowerCase() || "";
+    const mesReferencia = document.getElementById("filtroMesAno").value; // Formato: "YYYY-MM"
+    const termoBusca = document.getElementById("busca").value.toLowerCase();
 
-    // DESPESAS
-    const snapshot=await db.collection("contas").where("userId","==",currentUser.uid).get();
-    let totalDespesas=0, totalPago=0;
-    const tabela=document.getElementById("tabelaContas");
-    tabela.innerHTML="";
-    snapshot.docs.forEach(docSnap=>{
-        const conta={...docSnap.data(), id: docSnap.id};
-        totalDespesas += conta.valor;
-        if(conta.pago) totalPago += conta.valor;
-        if(conta.descricao.toLowerCase().includes(filtro)){
-            const linha=document.createElement("tr");
-            linha.innerHTML=`<td>${conta.descricao}</td><td>R$ ${conta.valor.toFixed(2)}</td><td>${conta.data.split("-").reverse().join("/")}</td>
-            <td>
-                <button class="btn editar" onclick="editarConta('${conta.id}','${conta.descricao}',${conta.valor},'${conta.data}')">Editar</button>
-                <button class="btn excluir" onclick="excluirConta('${conta.id}')">Excluir</button>
-                <button class="btn pago" onclick="togglePago('${conta.id}',${conta.pago})">${conta.pago?'Pago':'Marcar Pago'}</button>
-            </td>`;
-            tabela.appendChild(linha);
-        }
+    const snapContas = await db.collection("contas").where("userId","==",currentUser.uid).get();
+    const snapRendas = await db.collection("rendas").where("userId","==",currentUser.uid).get();
+
+    let somaRenda = 0, somaGastos = 0, somaPago = 0;
+    
+    const tabela = document.getElementById("tabelaCorpo");
+    const listaMobile = document.getElementById("listaMobile");
+    tabela.innerHTML = "";
+    listaMobile.innerHTML = "";
+
+    // Processar Rendas do Mês
+    snapRendas.docs.forEach(doc => {
+        const r = doc.data();
+        if(r.data.startsWith(mesReferencia)) somaRenda += r.valor;
     });
 
-    // RENDAS
-    const snapshotR=await db.collection("rendas").where("userId","==",currentUser.uid).get();
-    let totalRenda=0;
-    const tabelaR=document.getElementById("tabelaRenda");
-    tabelaR.innerHTML="";
-    snapshotR.docs.forEach(docSnap=>{
-        const renda={...docSnap.data(), id: docSnap.id};
-        totalRenda += renda.valor;
-        const linha=document.createElement("tr");
-        linha.innerHTML=`<td>${renda.descricao}</td><td>R$ ${renda.valor.toFixed(2)}</td>
-            <td>${renda.data.split("-").reverse().join("/")}</td>
-            <td><button class="btn excluir" onclick="excluirRenda('${renda.id}')">Excluir</button></td>`;
-        tabelaR.appendChild(linha);
+    // Processar Despesas do Mês
+    const despesas = snapContas.docs
+        .map(d => ({...d.data(), id: d.id}))
+        .filter(d => d.data.startsWith(mesReferencia))
+        .sort((a,b) => new Date(b.data) - new Date(a.data));
+
+    despesas.forEach(d => {
+        if(!d.descricao.toLowerCase().includes(termoBusca)) return;
+
+        somaGastos += d.valor;
+        if(d.pago) somaPago += d.valor;
+
+        // Inserir Tabela (Desktop)
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+            <td class="px-6 py-4 font-semibold text-slate-700">${d.descricao}</td>
+            <td class="px-6 py-4 text-slate-500">${d.data.split('-').reverse().join('/')}</td>
+            <td class="px-6 py-4 text-right font-bold">R$ ${d.valor.toFixed(2)}</td>
+            <td class="px-6 py-4 text-center">
+                <button onclick="togglePago('${d.id}', ${d.pago})" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase transition ${d.pago ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}">
+                    ${d.pago ? 'Pago' : 'Pendente'}
+                </button>
+            </td>
+            <td class="px-6 py-4 text-center">
+                <button onclick="excluirLancamento('${d.id}')" class="text-red-400 hover:text-red-600 transition">Excluir</button>
+            </td>
+        `;
+        tabela.appendChild(tr);
+
+        // Inserir Lista (Mobile)
+        const card = document.createElement("div");
+        card.className = `p-4 rounded-xl border-l-4 shadow-sm bg-white ${d.pago ? 'border-green-500' : 'border-amber-500'}`;
+        card.innerHTML = `
+            <div class="flex justify-between items-start">
+                <div>
+                    <h4 class="font-bold text-slate-800 text-sm">${d.descricao}</h4>
+                    <p class="text-[10px] text-slate-400 uppercase">${d.data.split('-').reverse().join('/')}</p>
+                </div>
+                <p class="font-bold text-slate-700">R$ ${d.valor.toFixed(2)}</p>
+            </div>
+            <div class="flex justify-between items-center mt-3">
+                <button onclick="togglePago('${d.id}', ${d.pago})" class="text-xs font-bold uppercase ${d.pago ? 'text-green-600' : 'text-amber-600'}">
+                    ${d.pago ? '✓ Confirmado' : '◯ Marcar Pago'}
+                </button>
+                <button onclick="excluirLancamento('${d.id}')" class="text-xs text-red-300">Remover</button>
+            </div>
+        `;
+        listaMobile.appendChild(card);
     });
 
-    const restanteDespesas = totalDespesas - totalPago;
-    const saldo = totalRenda - restanteDespesas;
-
-    document.getElementById("totalRenda").innerText = totalRenda.toFixed(2);
-    document.getElementById("totalValor").innerText = totalDespesas.toFixed(2);
-    document.getElementById("totalPago").innerText = totalPago.toFixed(2);
-    document.getElementById("totalRestante").innerText = saldo.toFixed(2);
+    // Atualizar Dashboard
+    document.getElementById("resumoRenda").innerText = somaRenda.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    document.getElementById("resumoGastos").innerText = somaGastos.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    document.getElementById("resumoPago").innerText = somaPago.toLocaleString('pt-BR', {minimumFractionDigits: 2});
+    document.getElementById("resumoSaldo").innerText = (somaRenda - somaPago).toLocaleString('pt-BR', {minimumFractionDigits: 2});
 }
 
-// EDITAR DESPESA
-function editarConta(id,desc,valor,data){
-    document.getElementById("descricao").value=desc.replace(/ - Parcela.*/,"");
-    document.getElementById("valor").value=valor;
-    document.getElementById("parcelas").value=1;
-    document.getElementById("data").value=data;
-    editandoId=id;
+async function togglePago(id, status) {
+    await db.collection("contas").doc(id).update({pago: !status});
+    atualizarDados();
 }
 
-// EXCLUIR
-async function excluirConta(id){ await db.collection("contas").doc(id).delete(); atualizarTabela(); }
-async function excluirRenda(id){ await db.collection("rendas").doc(id).delete(); atualizarTabela(); }
+async function excluirLancamento(id) {
+    if(confirm("Deseja apagar este registro?")) {
+        await db.collection("contas").doc(id).delete();
+        atualizarDados();
+    }
+}
 
-// MARCAR PAGO
-async function togglePago(id, pagoAtual){ await db.collection("contas").doc(id).update({pago:!pagoAtual}); atualizarTabela(); }
+function logout() { auth.signOut().then(() => location.reload()); }
 
-// GERAR PDF
-async function gerarPDF(){
-    if(!currentUser) return;
+// PDF SIMPLIFICADO
+function gerarPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(18); 
-    doc.text("Relatório Financeiro",14,20); 
+    const mes = document.getElementById("filtroMesAno").selectedOptions[0].text;
+    
+    doc.setFontSize(18);
+    doc.text(`Relatório Financeiro - ${mes}`, 14, 20);
     doc.setFontSize(12);
-    let y=30;
-
-    const snapshot = await db.collection("contas").where("userId","==",currentUser.uid).get();
-    const snapshotR = await db.collection("rendas").where("userId","==",currentUser.uid).get();
-
-    // DESPESAS
-    doc.setFontSize(14); doc.text("Despesas",14,y); y+=8; doc.setFontSize(12);
-    snapshot.docs.forEach(c=>{
-        const conta = c.data();
-        const status = conta.pago ? "[Pago]" : "[Não Pago]";
-        doc.text(`${conta.descricao} - R$ ${conta.valor.toFixed(2)} - ${conta.data.split("-").reverse().join("/")} ${status}`,14,y); y+=7;
-        if(y>270){ doc.addPage(); y=20; }
-    });
-
-    // RENDAS
-    doc.setFontSize(14); doc.text("Rendas",14,y); y+=8; doc.setFontSize(12);
-    snapshotR.docs.forEach(r=>{
-        const renda = r.data();
-        doc.text(`${renda.descricao} - R$ ${renda.valor.toFixed(2)} - ${renda.data.split("-").reverse().join("/")}`,14,y); y+=7;
-        if(y>270){ doc.addPage(); y=20; }
-    });
-
-    // RESUMO
-    let totalDespesas=0,totalPago=0,totalRenda=0;
-    snapshot.docs.forEach(c=>{ totalDespesas+=c.data().valor; if(c.data().pago) totalPago+=c.data().valor; });
-    snapshotR.docs.forEach(r=>{ totalRenda+=r.data().valor; });
-    const saldo = totalRenda-(totalDespesas-totalPago);
-    y+=10;
-    doc.text(`Total Renda: R$ ${totalRenda.toFixed(2)}`,14,y); y+=7;
-    doc.text(`Total Despesas: R$ ${totalDespesas.toFixed(2)}`,14,y); y+=7;
-    doc.text(`Pago: R$ ${totalPago.toFixed(2)}`,14,y); y+=7;
-    doc.text(`Saldo Restante: R$ ${saldo.toFixed(2)}`,14,y); y+=15;
-    doc.setFontSize(10);
-    doc.text("Desenvolvimento por Nay Cordeiro",14,290);
-    doc.save("relatorio_financeiro.pdf");
+    doc.text(`Saldo Disponível: R$ ${document.getElementById("resumoSaldo").innerText}`, 14, 30);
+    doc.text("Desenvolvido por Nay Cordeiro", 14, 40);
+    
+    doc.save(`financeiro-${mes}.pdf`);
 }
 </script>
+
 </body>
 </html>
